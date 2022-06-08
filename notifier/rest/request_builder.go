@@ -12,13 +12,13 @@ import (
 
 type RequestBuilder struct {
 	Headers http.Header
-
 	Timeout time.Duration
+	Client  *http.Client
 }
 
 func (rb *RequestBuilder) DoPost(url string, body interface{}) (response *Response) {
 	response = new(Response)
-
+	client := rb.getClient()
 	// Parse URL
 	resourceURL, err := parseURL(url)
 	if err != nil {
@@ -36,7 +36,7 @@ func (rb *RequestBuilder) DoPost(url string, body interface{}) (response *Respon
 	}
 
 	// Execute POST request
-	resp, err := http.Post(resourceURL, "appplication/json", bytes.NewBuffer(reqBody))
+	resp, err := client.Post(resourceURL, "appplication/json", bytes.NewBuffer(reqBody))
 	if err != nil {
 		log.Printf("Error executing request: %s", err)
 		response.Err = err
@@ -55,6 +55,12 @@ func (rb *RequestBuilder) DoPost(url string, body interface{}) (response *Respon
 	response.Response = resp
 	response.byteBody = respBody
 	return
+}
+
+func (rb *RequestBuilder) getClient() http.Client {
+	client := &http.Client{}
+	client.Timeout = rb.Timeout
+	return *client
 }
 
 func parseURL(reqlURL string) (string, error) {

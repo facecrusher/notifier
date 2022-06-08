@@ -26,5 +26,6 @@ func (md *MessageDispatcher) Dispatch(message domain.Message) error {
 		return errors.New("message queue is closed")
 	}
 	md.MessageQueue <- message
+	//fmt.Printf("Dispatching message: %s \n", message.ID)
 	return nil
 }

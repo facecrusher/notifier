@@ -2,6 +2,7 @@ package rest
 
 import (
 	"net/http"
+	"time"
 )
 
 type RestClient interface {
@@ -22,7 +23,7 @@ func NewNotifierRestClient(url string, headers map[string]string) *NotifierRestC
 		URL: url,
 		Request: &RequestBuilder{
 			Headers: defaultHeaders,
-			Timeout: 10,
+			Timeout: 800 * time.Millisecond,
 		},
 	}
 }
