@@ -1,20 +1,19 @@
 package processor
 
 import (
-	"notifier/notifier/message/domain"
 	"notifier/notifier/rest"
 	"sync"
 )
 
 const (
-	DEFAULT_SENDERS    = 3
-	DEFAULT_QUEUE_SIZE = 9
+	DEFAULT_SENDERS    = 5
+	DEFAULT_QUEUE_SIZE = 10
 )
 
 type MessageQueue struct {
 	Options        Options
-	internalQueue  chan domain.Message
-	readyPool      chan chan domain.Message
+	internalQueue  chan NotificationJob
+	readyPool      chan chan NotificationJob
 	senders        []*MessageSender
 	sendersStopped sync.WaitGroup
 	queueStopped   sync.WaitGroup
@@ -33,10 +32,10 @@ func NewMessageQueue(url string, options *Options) *MessageQueue {
 	}
 	client := rest.NewNotifierRestClient(url, make(map[string]string)) // set rest client
 	sendersStopped := sync.WaitGroup{}                                 // set wait group for stopped senders
-	readyPool := make(chan chan domain.Message, options.MaxSenders)    // set wait group for available pool of senders
+	readyPool := make(chan chan NotificationJob, options.MaxSenders)   // set wait group for available pool of senders
 	return &MessageQueue{
 		Options:        *options,
-		internalQueue:  make(chan domain.Message, options.MaxQueueSize),
+		internalQueue:  make(chan NotificationJob, options.MaxQueueSize),
 		readyPool:      readyPool,
 		senders:        createSenders(options.MaxSenders, client, readyPool, sendersStopped),
 		sendersStopped: sendersStopped,
@@ -45,7 +44,7 @@ func NewMessageQueue(url string, options *Options) *MessageQueue {
 	}
 }
 
-func (mq *MessageQueue) GetMessageQueue() chan domain.Message {
+func (mq *MessageQueue) GetMessageQueue() chan NotificationJob {
 	return mq.internalQueue
 }
 
@@ -76,7 +75,7 @@ func (mq *MessageQueue) Stop() {
 }
 
 func createSenders(senderAmount int, client *rest.NotifierRestClient,
-	readyPool chan chan domain.Message, done sync.WaitGroup) []*MessageSender {
+	readyPool chan chan NotificationJob, done sync.WaitGroup) []*MessageSender {
 	var senders []*MessageSender
 	for i := 0; i < senderAmount; i++ {
 		senders = append(senders, NewMessageSender(*client, readyPool, done))

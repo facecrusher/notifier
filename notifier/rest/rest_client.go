@@ -23,7 +23,7 @@ func NewNotifierRestClient(url string, headers map[string]string) *NotifierRestC
 		URL: url,
 		Request: &RequestBuilder{
 			Headers: defaultHeaders,
-			Timeout: 800 * time.Millisecond,
+			Timeout: 1000 * time.Millisecond,
 		},
 	}
 }

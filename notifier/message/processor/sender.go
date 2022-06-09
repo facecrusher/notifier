@@ -1,7 +1,6 @@
 package processor
 
 import (
-	"fmt"
 	"notifier/notifier/message/domain"
 	"notifier/notifier/rest"
 	"sync"
@@ -14,25 +13,19 @@ type Sender interface {
 type MessageSender struct {
 	RestClient       rest.NotifierRestClient
 	done             sync.WaitGroup
-	readyPool        chan chan domain.Message
-	assignedJobQueue chan domain.Message
+	readyPool        chan chan NotificationJob
+	assignedJobQueue chan NotificationJob
 	quit             chan bool
 }
 
-func NewMessageSender(restClient rest.NotifierRestClient, readyPool chan chan domain.Message, done sync.WaitGroup) *MessageSender {
+func NewMessageSender(restClient rest.NotifierRestClient, readyPool chan chan NotificationJob, done sync.WaitGroup) *MessageSender {
 	return &MessageSender{
 		RestClient:       restClient,
 		done:             done,
 		readyPool:        readyPool,
-		assignedJobQueue: make(chan domain.Message),
+		assignedJobQueue: make(chan NotificationJob),
 		quit:             make(chan bool),
 	}
-}
-
-func (ms *MessageSender) Send(message domain.Message) error {
-	var decode map[string]string
-	fmt.Printf("Sending message: [id = %s] [message = %s] \n", message.ID, message.Message)
-	return ms.RestClient.Post(message, decode)
 }
 
 func (ms *MessageSender) Start() {
@@ -41,8 +34,8 @@ func (ms *MessageSender) Start() {
 		for {
 			ms.readyPool <- ms.assignedJobQueue
 			select {
-			case message := <-ms.assignedJobQueue:
-				ms.Send(message)
+			case notificationJob := <-ms.assignedJobQueue:
+				notificationJob.Process()
 			case <-ms.quit:
 				ms.done.Done()
 				return
