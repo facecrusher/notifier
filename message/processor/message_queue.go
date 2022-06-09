@@ -32,7 +32,7 @@ func NewMessageQueue(url string, options *Options) *MessageQueue {
 	}
 	client := rest.NewNotifierRestClient(url, make(map[string]string)) // set rest client
 	sendersStopped := sync.WaitGroup{}                                 // set wait group for stopped senders
-	readyPool := make(chan chan NotificationJob, options.MaxSenders)   // set wait group for available pool of senders
+	readyPool := make(chan chan NotificationJob, options.MaxSenders)   // set bidirectional channel for available senders
 	return &MessageQueue{
 		Options:        *options,
 		internalQueue:  make(chan NotificationJob, options.MaxQueueSize),
@@ -61,7 +61,8 @@ func (mq *MessageQueue) initDispatch() {
 			senderChannel := <-mq.readyPool  // look for an available sender
 			senderChannel <- notificationJob // send the job to the senders channel for processing
 		case <-mq.quit:
-			mq.stopSenders()       //stop senders and wait for them to be done with any on going message delivery
+			mq.stopSenders() //stop senders and wait for them to be done with any on going message delivery
+			mq.sendersStopped.Wait()
 			mq.queueStopped.Done() // stop the message queue
 			return
 		}
@@ -92,5 +93,4 @@ func (mq *MessageQueue) stopSenders() {
 	for i := 0; i < len(mq.senders); i++ {
 		mq.senders[i].Stop()
 	}
-	mq.sendersStopped.Wait()
 }

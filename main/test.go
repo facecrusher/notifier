@@ -42,7 +42,7 @@ func NewJobQueue(maxWorkers int) *JobQueue {
 		workers[i] = NewWorker(readyPool, workersStopped)
 	}
 	return &JobQueue{
-		internalQueue:     make(chan Job, 1000),
+		internalQueue:     make(chan Job),
 		readyPool:         readyPool,
 		workers:           workers,
 		dispatcherStopped: sync.WaitGroup{},
@@ -130,17 +130,20 @@ type TestJob struct {
 // Process - test process function
 func (t *TestJob) Process() {
 	fmt.Printf("Processing job '%s'\n", t.ID)
-	time.Sleep(200 * time.Millisecond)
+	time.Sleep(1 * time.Second)
 }
 
-func main() {
-	// queue := NewJobQueue(runtime.NumCPU())
-	// queue.Start()
-	// defer queue.Stop()
+// func main() {
+// 	queue := NewJobQueue(runtime.NumCPU())
+// 	queue.Start()
+// 	defer queue.Stop()
 
-	// for i := 0; i < 5000; i++ {
-	// 	queue.Submit(&TestJob{strconv.Itoa(i)})
-	// }
+// 	for i := 0; i < 20; i++ {
+// 		queue.Submit(&TestJob{strconv.Itoa(i)})
+// 	}
+// }
+
+func main() {
 	url := "https://eouss1txxyn5t7x.m.pipedream.net"
 	client := rest.NewNotifierRestClient(url, make(map[string]string))
 	messageQueue := processor.NewMessageQueue(url, nil)
