@@ -4,6 +4,7 @@ import (
 	"log"
 	"notifier/message/domain"
 	"notifier/rest"
+	"time"
 )
 
 type Job interface {
@@ -11,19 +12,22 @@ type Job interface {
 }
 
 type NotificationJob struct {
-	Client  rest.NotifierRestClient
-	Message domain.Message
+	Client   rest.NotifierRestClient
+	Message  domain.Message
+	Interval time.Duration
 }
 
-func NewNotificationJob(client rest.NotifierRestClient, message string) *NotificationJob {
+func NewNotificationJob(client rest.NotifierRestClient, message string, interval time.Duration) *NotificationJob {
 	return &NotificationJob{
-		Client:  client,
-		Message: *domain.NewMessage(message),
+		Client:   client,
+		Message:  *domain.NewMessage(message),
+		Interval: interval,
 	}
 }
 
 func (j *NotificationJob) Process() error {
 	log.Printf("Sending notification: [id = %s][message = %s]\n", j.Message.ID, j.Message.Message)
+	time.Sleep(j.Interval)
 	// var decode map[string]string
 	// err := j.Client.Post(j.Message, decode)
 	// if err != nil {
