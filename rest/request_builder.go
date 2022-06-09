@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
 	"time"
@@ -22,7 +21,6 @@ func (rb *RequestBuilder) DoPost(url string, body interface{}) (response *Respon
 	// Parse URL
 	resourceURL, err := parseURL(url)
 	if err != nil {
-		log.Printf("Error while parsing URL: %s", err)
 		response.Err = err
 		return
 	}
@@ -30,7 +28,6 @@ func (rb *RequestBuilder) DoPost(url string, body interface{}) (response *Respon
 	// Marshal request to JSON
 	reqBody, err := marshalReqBody(body)
 	if err != nil {
-		log.Printf("Error while marshaling request body: %s", err)
 		response.Err = err
 		return
 	}
@@ -38,7 +35,6 @@ func (rb *RequestBuilder) DoPost(url string, body interface{}) (response *Respon
 	// Execute POST request
 	resp, err := client.Post(resourceURL, "appplication/json", bytes.NewBuffer(reqBody))
 	if err != nil {
-		log.Printf("Error executing request: %s", err)
 		response.Err = err
 		return
 	}
@@ -47,7 +43,6 @@ func (rb *RequestBuilder) DoPost(url string, body interface{}) (response *Respon
 	defer resp.Body.Close()
 	respBody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Printf("Error while reading response: %s", err)
 		response.Err = err
 		return
 	}

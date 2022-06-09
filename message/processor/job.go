@@ -1,9 +1,9 @@
 package processor
 
 import (
-	"fmt"
-	"notifier/notifier/message/domain"
-	"notifier/notifier/rest"
+	"log"
+	"notifier/message/domain"
+	"notifier/rest"
 )
 
 type Job interface {
@@ -24,6 +24,10 @@ func NewNotificationJob(client rest.NotifierRestClient, message string) *Notific
 
 func (j *NotificationJob) Process() error {
 	var decode map[string]string
-	fmt.Printf("Sending notification: [id = %s][message = %s]\n", j.Message.ID, j.Message.Message)
-	return j.Client.Post(j.Message, decode)
+	log.Printf("Sending notification: [id = %s][message = %s]\n", j.Message.ID, j.Message.Message)
+	err := j.Client.Post(j.Message, decode)
+	if err != nil {
+		log.Printf("Error sending notification: [id = %s][message = %s][error = %s]\n", j.Message.ID, j.Message.Message, err.Error())
+	}
+	return err
 }

@@ -2,8 +2,8 @@ package processor
 
 import (
 	"errors"
-	"notifier/notifier/message/domain"
-	"notifier/notifier/rest"
+	"notifier/message/domain"
+	"notifier/rest"
 )
 
 type Dispatcher interface {

@@ -1,7 +1,7 @@
 package processor
 
 import (
-	"notifier/notifier/rest"
+	"notifier/rest"
 	"sync"
 )
 
@@ -49,24 +49,23 @@ func (mq *MessageQueue) GetMessageQueue() chan NotificationJob {
 }
 
 func (mq *MessageQueue) Start() {
-	for i := 0; i < len(mq.senders); i++ {
-		mq.senders[i].Start()
-	}
+	mq.startSenders()
+	go mq.initDispatch()
+}
+
+func (mq *MessageQueue) initDispatch() {
 	mq.queueStopped.Add(1)
-	go func() {
-		for {
-			select {
-			case message := <-mq.internalQueue: // a message is present in the queue
-				//fmt.Printf("Processing message: %s \n", message.ID)
-				senderChannel := <-mq.readyPool // look for an available sender
-				senderChannel <- message        // send the message to the senders channel for processing
-			case <-mq.quit:
-				mq.stopSenders()       //stop senders and wait for them to be done with any on going message delivery
-				mq.queueStopped.Done() // stop the message queue
-				return
-			}
+	for {
+		select {
+		case notificationJob := <-mq.internalQueue: // a notification job is present in the queue
+			senderChannel := <-mq.readyPool  // look for an available sender
+			senderChannel <- notificationJob // send the job to the senders channel for processing
+		case <-mq.quit:
+			mq.stopSenders()       //stop senders and wait for them to be done with any on going message delivery
+			mq.queueStopped.Done() // stop the message queue
+			return
 		}
-	}()
+	}
 }
 
 func (mq *MessageQueue) Stop() {
@@ -83,9 +82,15 @@ func createSenders(senderAmount int, client *rest.NotifierRestClient,
 	return senders
 }
 
+func (mq *MessageQueue) startSenders() {
+	for i := 0; i < len(mq.senders); i++ {
+		mq.senders[i].Start()
+	}
+}
+
 func (mq *MessageQueue) stopSenders() {
-	for _, sender := range mq.senders {
-		sender.Stop()
+	for i := 0; i < len(mq.senders); i++ {
+		mq.senders[i].Stop()
 	}
 	mq.sendersStopped.Wait()
 }

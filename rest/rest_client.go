@@ -23,7 +23,7 @@ func NewNotifierRestClient(url string, headers map[string]string) *NotifierRestC
 		URL: url,
 		Request: &RequestBuilder{
 			Headers: defaultHeaders,
-			Timeout: 1000 * time.Millisecond,
+			Timeout: 500 * time.Millisecond,
 		},
 	}
 }
@@ -32,7 +32,7 @@ func (nrc *NotifierRestClient) Post(body interface{},
 	decode interface{}) error {
 	response := nrc.Request.DoPost(nrc.URL, body)
 	if response.Err != nil {
-		return nil
+		return response.Err
 	}
 
 	if response.StatusCode != http.StatusOK {
