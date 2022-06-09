@@ -1,1 +1,5 @@
+# main folder used for tests
 main/
+
+# vscode generated files
+.vscode/
