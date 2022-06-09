@@ -35,7 +35,7 @@ func NewMessageQueue(url string, options *Options) *MessageQueue {
 	readyPool := make(chan chan NotificationJob, options.MaxSenders)   // set bidirectional channel for available senders
 	return &MessageQueue{
 		Options:        *options,
-		internalQueue:  make(chan NotificationJob, options.MaxQueueSize),
+		internalQueue:  make(chan NotificationJob),
 		readyPool:      readyPool,
 		senders:        createSenders(options.MaxSenders, client, readyPool, sendersStopped),
 		sendersStopped: sendersStopped,
@@ -70,7 +70,10 @@ func (mq *MessageQueue) initDispatch() {
 }
 
 func (mq *MessageQueue) Stop() {
-	mq.quit <- true
+	if len(mq.internalQueue) == 0 {
+		mq.quit <- true
+		mq.queueStopped.Wait()
+	}
 	mq.queueStopped.Wait()
 }
 

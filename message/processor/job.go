@@ -23,11 +23,12 @@ func NewNotificationJob(client rest.NotifierRestClient, message string) *Notific
 }
 
 func (j *NotificationJob) Process() error {
-	var decode map[string]string
 	log.Printf("Sending notification: [id = %s][message = %s]\n", j.Message.ID, j.Message.Message)
-	err := j.Client.Post(j.Message, decode)
-	if err != nil {
-		log.Printf("Error sending notification: [id = %s][message = %s][error = %s]\n", j.Message.ID, j.Message.Message, err.Error())
-	}
-	return err
+	// var decode map[string]string
+	// err := j.Client.Post(j.Message, decode)
+	// if err != nil {
+	// 	log.Printf("Error sending notification: [id = %s][message = %s][error = %s]\n", j.Message.ID, j.Message.Message, err.Error())
+	// }
+	// return err
+	return nil
 }
