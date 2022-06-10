@@ -24,15 +24,13 @@ func NewHTTPError(responseBody string, statusCode int, url string, headers http.
 }
 
 func (e *HTTPError) Error() string {
-	return fmt.Sprintf("[url: %s][error: Error calling external API][status: %d][cause: %s]", e.URL, e.StatusCode, e.ResponseBody)
+	return fmt.Sprintf("[url: %s][error: Error calling API][status: %d][cause: %s]", e.URL, e.StatusCode, e.ResponseBody)
 }
 
 func headersToString(headers http.Header) string {
 	result := ""
-
 	for key, value := range headers {
 		result = fmt.Sprintf("%s => %s,", key, value)
 	}
-
 	return result
 }

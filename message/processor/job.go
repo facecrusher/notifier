@@ -27,12 +27,11 @@ func NewNotificationJob(client rest.NotifierRestClient, message string, interval
 
 func (j *NotificationJob) Process() error {
 	log.Printf("Sending notification: [id = %s][message = %s]\n", j.Message.ID, j.Message.Message)
+	var decode map[string]string
 	time.Sleep(j.Interval)
-	// var decode map[string]string
-	// err := j.Client.Post(j.Message, decode)
-	// if err != nil {
-	// 	log.Printf("Error sending notification: [id = %s][message = %s][error = %s]\n", j.Message.ID, j.Message.Message, err.Error())
-	// }
-	// return err
-	return nil
+	err := j.Client.Post(j.Message, decode)
+	if err != nil {
+		log.Printf("Error sending notification: [id = %s][message = %s][error = %s]\n", j.Message.ID, j.Message.Message, err.Error())
+	}
+	return err
 }

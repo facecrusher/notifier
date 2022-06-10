@@ -15,7 +15,6 @@ type MessageDispatcher struct {
 	Client       rest.NotifierRestClient
 	MessageQueue chan NotificationJob
 	Interval     time.Duration
-	IsFinished   bool
 }
 
 func NewDispatcher(mq MessageQueue, c rest.NotifierRestClient, interval time.Duration) *MessageDispatcher {
@@ -23,14 +22,22 @@ func NewDispatcher(mq MessageQueue, c rest.NotifierRestClient, interval time.Dur
 		Client:       c,
 		MessageQueue: mq.GetMessageQueue(),
 		Interval:     interval,
-		IsFinished:   false,
 	}
 }
 
 func (md *MessageDispatcher) Dispatch(message domain.Message) error {
-	if md.IsFinished {
+	if isQueueClosed(md.MessageQueue) {
 		return errors.New("message queue is closed")
 	}
 	md.MessageQueue <- *NewNotificationJob(md.Client, message.Message, md.Interval)
 	return nil
+}
+
+func isQueueClosed(messageQueue chan NotificationJob) bool {
+	select {
+	case <-messageQueue:
+		return true
+	default:
+		return false
+	}
 }

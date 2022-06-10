@@ -5,8 +5,12 @@ import (
 	"time"
 )
 
+const (
+	DEFAULT_TIMEOUT = 1000 * time.Millisecond
+)
+
 type RestClient interface {
-	Post(url string, body interface{}, decode interface{}, header http.Header) error
+	Post(body interface{}, decode interface{}) error
 }
 
 type NotifierRestClient struct {
@@ -23,13 +27,12 @@ func NewNotifierRestClient(url string, headers map[string]string) *NotifierRestC
 		URL: url,
 		Request: &RequestBuilder{
 			Headers: defaultHeaders,
-			Timeout: 500 * time.Millisecond,
+			Timeout: DEFAULT_TIMEOUT,
 		},
 	}
 }
 
-func (nrc *NotifierRestClient) Post(body interface{},
-	decode interface{}) error {
+func (nrc *NotifierRestClient) Post(body interface{}, decode interface{}) error {
 	response := nrc.Request.DoPost(nrc.URL, body)
 	if response.Err != nil {
 		return response.Err
