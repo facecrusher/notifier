@@ -13,10 +13,10 @@ const (
 type MessageQueue struct {
 	Options        Options
 	internalQueue  chan NotificationJob
-	readyPool      chan chan NotificationJob
+	availablePool  chan chan NotificationJob
 	senders        []*MessageSender
 	sendersStopped sync.WaitGroup
-	queueStopped   sync.WaitGroup
+	QueueStopped   sync.WaitGroup
 	quit           chan bool
 }
 
@@ -25,21 +25,21 @@ type Options struct {
 	MaxQueueSize int
 }
 
-func NewMessageQueue(url string, options *Options) *MessageQueue {
+func NewMessageQueue(url string, options *Options, mainWaitGroup sync.WaitGroup) *MessageQueue {
 	// Set default queue options if none are provided
 	if options == nil {
-		options = &Options{MaxSenders: DEFAULT_SENDERS, MaxQueueSize: DEFAULT_QUEUE_SIZE}
+		options = getDefaultOptions()
 	}
-	client := rest.NewNotifierRestClient(url, make(map[string]string)) // set rest client
-	sendersStopped := sync.WaitGroup{}                                 // set wait group for stopped senders
-	readyPool := make(chan chan NotificationJob, options.MaxSenders)   // set bidirectional channel for available senders
+	client := rest.NewNotifierRestClient(url, make(map[string]string))   // set rest client
+	sendersStopped := sync.WaitGroup{}                                   // set wait group for stopped senders
+	availablePool := make(chan chan NotificationJob, options.MaxSenders) // set pool to maintain available senders
 	return &MessageQueue{
 		Options:        *options,
-		internalQueue:  make(chan NotificationJob),
-		readyPool:      readyPool,
-		senders:        createSenders(options.MaxSenders, client, readyPool, sendersStopped),
+		internalQueue:  make(chan NotificationJob, options.MaxQueueSize),
+		availablePool:  availablePool,
+		senders:        createSenders(options.MaxSenders, client, availablePool, sendersStopped),
 		sendersStopped: sendersStopped,
-		queueStopped:   sync.WaitGroup{},
+		QueueStopped:   mainWaitGroup,
 		quit:           make(chan bool),
 	}
 }
@@ -53,28 +53,44 @@ func (mq *MessageQueue) Start() {
 	go mq.initDispatch()
 }
 
+// Stop shuts down the message queue, checking that all messages in the buffer are processed and that
+// before sending the quit signal.
+func (mq *MessageQueue) Stop() {
+	mq.quit <- true
+	mq.QueueStopped.Wait()
+}
+
 func (mq *MessageQueue) initDispatch() {
-	mq.queueStopped.Add(1)
+	mq.QueueStopped.Add(1)
 	for {
 		select {
 		case notificationJob := <-mq.internalQueue: // a notification job is present in the queue
-			senderChannel := <-mq.readyPool  // look for an available sender
-			senderChannel <- notificationJob // send the job to the senders channel for processing
+			senderChannel := <-mq.availablePool // look for an available sender in the availablePool
+			senderChannel <- notificationJob    // send the job to the selected sender assignedJobQueue for processing
 		case <-mq.quit:
-			mq.stopSenders() //stop senders and wait for them to be done with any on going message delivery
-			mq.sendersStopped.Wait()
-			mq.queueStopped.Done() // stop the message queue
+			mq.flushEvents()         //process any pending events in the buffer
+			mq.stopSenders()         // stop senders
+			mq.sendersStopped.Wait() // wait for senders to finish any on going work
+			mq.QueueStopped.Done()   // stop the message queue
 			return
 		}
 	}
 }
 
-func (mq *MessageQueue) Stop() {
-	if len(mq.internalQueue) == 0 {
-		mq.quit <- true
-		mq.queueStopped.Wait()
+func (mq *MessageQueue) flushEvents() {
+	for {
+		select {
+		case notificationJob := <-mq.internalQueue: // a notification job is present in the queue
+			senderChannel := <-mq.availablePool // look for an available sender in the availablePool
+			senderChannel <- notificationJob
+		default:
+			return
+		}
 	}
-	mq.queueStopped.Wait()
+}
+
+func getDefaultOptions() *Options {
+	return &Options{MaxSenders: DEFAULT_SENDERS, MaxQueueSize: DEFAULT_QUEUE_SIZE}
 }
 
 func createSenders(senderAmount int, client *rest.NotifierRestClient,

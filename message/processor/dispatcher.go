@@ -1,10 +1,15 @@
 package processor
 
 import (
-	"errors"
+	"fmt"
+	"log"
 	"notifier/message/domain"
 	"notifier/rest"
 	"time"
+)
+
+const (
+	RETRY_INTERVAL = 2 * rest.DEFAULT_TIMEOUT
 )
 
 type Dispatcher interface {
@@ -17,27 +22,39 @@ type MessageDispatcher struct {
 	Interval     time.Duration
 }
 
-func NewDispatcher(mq MessageQueue, c rest.NotifierRestClient, interval time.Duration) *MessageDispatcher {
+func NewDispatcher(mq MessageQueue, c rest.NotifierRestClient, interval *time.Duration) *MessageDispatcher {
 	return &MessageDispatcher{
 		Client:       c,
 		MessageQueue: mq.GetMessageQueue(),
-		Interval:     interval,
+		Interval:     getInterval(interval),
 	}
 }
 
 func (md *MessageDispatcher) Dispatch(message domain.Message) error {
-	if isQueueClosed(md.MessageQueue) {
-		return errors.New("message queue is closed")
+	messageJob := *NewNotificationJob(md.Client, message.Message, md.Interval)
+	select {
+	case md.MessageQueue <- messageJob:
+	default:
+		log.Printf("Processing queue full. Putting message [%s] in retry queue.", messageJob.Message.Message)
+		return md.Retry(messageJob)
 	}
-	md.MessageQueue <- *NewNotificationJob(md.Client, message.Message, md.Interval)
 	return nil
 }
 
-func isQueueClosed(messageQueue chan NotificationJob) bool {
+// Retry attempts to re-queue a message in case the buffer was full full at the time message was received
+func (md *MessageDispatcher) Retry(job NotificationJob) error {
+	time.Sleep(RETRY_INTERVAL)
 	select {
-	case <-messageQueue:
-		return true
+	case md.MessageQueue <- job:
 	default:
-		return false
+		return fmt.Errorf("processing queue full when retried. Message [%s] discarded", job.Message.Message)
 	}
+	return nil
+}
+
+func getInterval(inputInterval *time.Duration) (interval time.Duration) {
+	if inputInterval == nil {
+		return 0
+	}
+	return *inputInterval
 }
