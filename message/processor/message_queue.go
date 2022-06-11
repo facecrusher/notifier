@@ -68,20 +68,20 @@ func (mq *MessageQueue) initDispatch() {
 			senderChannel := <-mq.availablePool // look for an available sender in the availablePool
 			senderChannel <- notificationJob    // send the job to the selected sender assignedJobQueue for processing
 		case <-mq.quit:
-			mq.flushEvents()         //process any pending events in the buffer
-			mq.stopSenders()         // stop senders
-			mq.sendersStopped.Wait() // wait for senders to finish any on going work
-			mq.QueueStopped.Done()   // stop the message queue
+			mq.processPendingMessages() //process any pending notification jobs in the queue buffer
+			mq.stopSenders()            // stop senders
+			mq.sendersStopped.Wait()    // wait for senders to finish any on going work
+			mq.QueueStopped.Done()      // stop the message queue
 			return
 		}
 	}
 }
 
-func (mq *MessageQueue) flushEvents() {
+func (mq *MessageQueue) processPendingMessages() {
 	for {
 		select {
-		case notificationJob := <-mq.internalQueue: // a notification job is present in the queue
-			senderChannel := <-mq.availablePool // look for an available sender in the availablePool
+		case notificationJob := <-mq.internalQueue:
+			senderChannel := <-mq.availablePool
 			senderChannel <- notificationJob
 		default:
 			return
