@@ -25,7 +25,7 @@ type Options struct {
 	MaxQueueSize int
 }
 
-func NewMessageQueue(url string, options *Options, mainWaitGroup sync.WaitGroup) *MessageQueue {
+func NewMessageQueue(url string, options *Options) *MessageQueue {
 	// Set default queue options if none are provided
 	if options == nil {
 		options = getDefaultOptions()
@@ -39,7 +39,7 @@ func NewMessageQueue(url string, options *Options, mainWaitGroup sync.WaitGroup)
 		availablePool:  availablePool,
 		senders:        createSenders(options.MaxSenders, client, availablePool, sendersStopped),
 		sendersStopped: sendersStopped,
-		QueueStopped:   mainWaitGroup,
+		QueueStopped:   sync.WaitGroup{},
 		quit:           make(chan bool),
 	}
 }
