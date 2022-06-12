@@ -1,6 +1,7 @@
 package notifier
 
 import (
+	"notifier/message/domain"
 	"notifier/message/processor"
 	"notifier/rest"
 	"time"
@@ -23,4 +24,9 @@ func NewNotifier(url string, interval *time.Duration, options *processor.Options
 		interval:          *interval,
 		messageDispatcher: dispatcher,
 	}
+}
+
+func (n *Notifier) Notify(messageString string) error {
+	message := domain.NewMessage(messageString)
+	return n.messageDispatcher.Dispatch(*message)
 }
