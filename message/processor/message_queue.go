@@ -25,12 +25,11 @@ type Options struct {
 	MaxQueueSize int
 }
 
-func NewMessageQueue(url string, options *Options) *MessageQueue {
+func NewMessageQueue(url string, options *Options, client rest.NotifierRestClient) *MessageQueue {
 	// Set default queue options if none are provided
 	if options == nil {
 		options = getDefaultOptions()
 	}
-	client := rest.NewNotifierRestClient(url, make(map[string]string))   // set rest client
 	sendersStopped := sync.WaitGroup{}                                   // set wait group for stopped senders
 	availablePool := make(chan chan NotificationJob, options.MaxSenders) // set pool to maintain available senders
 	return &MessageQueue{
@@ -93,11 +92,11 @@ func getDefaultOptions() *Options {
 	return &Options{MaxSenders: DEFAULT_SENDERS, MaxQueueSize: DEFAULT_QUEUE_SIZE}
 }
 
-func createSenders(senderAmount int, client *rest.NotifierRestClient,
+func createSenders(senderAmount int, client rest.NotifierRestClient,
 	readyPool chan chan NotificationJob, done sync.WaitGroup) []*MessageSender {
 	var senders []*MessageSender
 	for i := 0; i < senderAmount; i++ {
-		senders = append(senders, NewMessageSender(*client, readyPool, done))
+		senders = append(senders, NewMessageSender(client, readyPool, done))
 	}
 	return senders
 }

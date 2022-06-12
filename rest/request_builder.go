@@ -23,6 +23,7 @@ type RequestBuilder struct {
 func (rb *RequestBuilder) DoPost(url string, body interface{}) (response *Response) {
 	response = new(Response)
 	client := rb.getClient()
+
 	// Parse URL
 	resourceURL, err := parseURL(url)
 	if err != nil {
@@ -37,13 +38,21 @@ func (rb *RequestBuilder) DoPost(url string, body interface{}) (response *Respon
 		return
 	}
 
-	// Execute POST request
-	resp, err := client.Post(resourceURL, "appplication/json", bytes.NewBuffer(reqBody))
+	// Create request object
+	req, err := http.NewRequest(http.MethodPost, resourceURL, bytes.NewBuffer(reqBody))
 	if err != nil {
 		response.Err = err
 		return
 	}
+	// Set headers if any defined
+	req.Header = rb.Headers
 
+	// Execute request
+	resp, err := client.Do(req)
+	if err != nil {
+		response.Err = err
+		return
+	}
 	// Read response
 	defer resp.Body.Close()
 	respBody, err := ioutil.ReadAll(resp.Body)
@@ -51,7 +60,6 @@ func (rb *RequestBuilder) DoPost(url string, body interface{}) (response *Respon
 		response.Err = err
 		return
 	}
-
 	response.Response = resp
 	response.byteBody = respBody
 	return

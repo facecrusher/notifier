@@ -13,9 +13,9 @@ type Notifier struct {
 	interval          time.Duration
 }
 
-func NewNotifier(url string, interval *time.Duration, options *processor.Options) *Notifier {
-	client := rest.NewNotifierRestClient(url, make(map[string]string))
-	queue := *processor.NewMessageQueue(url, options)
+func NewNotifier(url string, interval *time.Duration, options *processor.Options, headers *map[string]string) *Notifier {
+	client := rest.NewNotifierRestClient(url, headers)
+	queue := *processor.NewMessageQueue(url, options, *client)
 	dispatcher := processor.NewDispatcher(queue, *client, interval)
 	return &Notifier{
 		url:               url,

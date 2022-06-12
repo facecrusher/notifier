@@ -12,10 +12,9 @@ import (
 
 func Test_Dispatch(t *testing.T) {
 	url := "http://www.test.com"
-	headers := map[string]string{"Content-Type": "application/json"}
 
 	// Dispatcher dependencies
-	testClient := rest.NewNotifierRestClient(url, headers)
+	testClient := rest.NewNotifierRestClient(url, nil)
 	testQueue := &MessageQueue{internalQueue: make(chan NotificationJob, 1)}
 	testInterval := 1 * time.Second
 

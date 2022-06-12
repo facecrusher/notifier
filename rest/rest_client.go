@@ -18,15 +18,12 @@ type NotifierRestClient struct {
 	URL     string
 }
 
-func NewNotifierRestClient(url string, headers map[string]string) *NotifierRestClient {
-	defaultHeaders := make(http.Header)
-	for k, v := range headers {
-		defaultHeaders.Add(k, v)
-	}
+func NewNotifierRestClient(url string, headers *map[string]string) *NotifierRestClient {
+	reqHeaders := setHeaders(headers)
 	return &NotifierRestClient{
 		URL: url,
 		Request: &RequestBuilder{
-			Headers: defaultHeaders,
+			Headers: reqHeaders,
 			Timeout: DEFAULT_TIMEOUT,
 		},
 	}
@@ -48,4 +45,15 @@ func (nrc *NotifierRestClient) Post(body interface{}, decode interface{}) error 
 		return err
 	}
 	return nil
+}
+
+func setHeaders(headers *map[string]string) http.Header {
+	reqHeaders := make(http.Header)
+	reqHeaders.Add("Content-Type", "application/json")
+	if headers != nil {
+		for k, v := range *headers {
+			reqHeaders.Add(k, v)
+		}
+	}
+	return reqHeaders
 }
