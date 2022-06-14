@@ -1,8 +1,9 @@
 package processor
 
 import (
-	"notifier/rest"
 	"sync"
+
+	"github.com/facecrusher/notifier/rest"
 )
 
 const (

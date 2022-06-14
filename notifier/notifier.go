@@ -1,10 +1,12 @@
 package notifier
 
 import (
-	"notifier/message/domain"
-	"notifier/message/processor"
-	"notifier/rest"
 	"time"
+
+	"github.com/facecrusher/notifier/message/processor"
+	"github.com/facecrusher/notifier/rest"
+
+	"github.com/facecrusher/notifier/message/domain"
 )
 
 type Notifier struct {

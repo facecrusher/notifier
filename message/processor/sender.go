@@ -1,9 +1,10 @@
 package processor
 
 import (
-	"notifier/message/domain"
-	"notifier/rest"
 	"sync"
+
+	"github.com/facecrusher/notifier/message/domain"
+	"github.com/facecrusher/notifier/rest"
 )
 
 type Sender interface {

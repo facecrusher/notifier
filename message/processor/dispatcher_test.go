@@ -2,10 +2,12 @@ package processor
 
 import (
 	"fmt"
-	"notifier/message/domain"
-	"notifier/rest"
 	"testing"
 	"time"
+
+	"github.com/facecrusher/notifier/rest"
+
+	"github.com/facecrusher/notifier/message/domain"
 
 	"github.com/stretchr/testify/assert"
 )

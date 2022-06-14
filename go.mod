@@ -1,4 +1,4 @@
-module notifier
+module github.com/facecrusher/notifier
 
 go 1.16
 
