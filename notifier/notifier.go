@@ -30,3 +30,11 @@ func (n *Notifier) Notify(messageString string) error {
 	message := domain.NewMessage(messageString)
 	return n.messageDispatcher.Dispatch(*message)
 }
+
+func (n *Notifier) Start() {
+	n.messageQueue.Start()
+}
+
+func (n *Notifier) Stop() {
+	n.messageQueue.Stop()
+}
