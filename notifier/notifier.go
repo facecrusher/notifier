@@ -1,6 +1,7 @@
 package notifier
 
 import (
+	"log"
 	"time"
 
 	"github.com/facecrusher/notifier/message/processor"
@@ -38,5 +39,6 @@ func (n *Notifier) Start() {
 }
 
 func (n *Notifier) Stop() {
+	log.Printf("Sending shut down signal to all workers")
 	n.messageQueue.Stop()
 }
