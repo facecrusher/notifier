@@ -3,7 +3,7 @@ package processor
 import (
 	"sync"
 
-	"github.com/facecrusher/notifier/rest"
+	"github.com/facecrusher/notifier/rest/client"
 )
 
 const (
@@ -26,7 +26,7 @@ type Options struct {
 	MaxQueueSize int
 }
 
-func NewMessageQueue(url string, options *Options, client rest.NotifierRestClient) *MessageQueue {
+func NewMessageQueue(url string, options *Options, client client.NotifierRestClient) *MessageQueue {
 	// Set default queue options if none are provided
 	if options == nil {
 		options = getDefaultOptions()
@@ -93,7 +93,7 @@ func getDefaultOptions() *Options {
 	return &Options{MaxSenders: DEFAULT_SENDERS, MaxQueueSize: DEFAULT_QUEUE_SIZE}
 }
 
-func createSenders(senderAmount int, client rest.NotifierRestClient,
+func createSenders(senderAmount int, client client.NotifierRestClient,
 	readyPool chan chan NotificationJob, done sync.WaitGroup) []*MessageSender {
 	var senders []*MessageSender
 	for i := 0; i < senderAmount; i++ {

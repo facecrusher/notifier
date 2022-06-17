@@ -5,9 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/facecrusher/notifier/rest"
-
 	"github.com/facecrusher/notifier/message/domain"
+	"github.com/facecrusher/notifier/rest/client"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -16,7 +15,7 @@ func Test_Dispatch(t *testing.T) {
 	url := "http://www.test.com"
 
 	// Dispatcher dependencies
-	testClient := rest.NewNotifierRestClient(url, nil)
+	testClient := client.NewNotifierRestClient(url, nil)
 	testQueue := &MessageQueue{internalQueue: make(chan NotificationJob, 1)}
 	testInterval := 1 * time.Second
 

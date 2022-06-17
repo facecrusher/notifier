@@ -1,4 +1,4 @@
-package rest
+package response
 
 import (
 	"encoding/json"
@@ -8,23 +8,29 @@ import (
 	"strings"
 )
 
-type Response struct {
+type Response interface {
+	String()
+	Bytes()
+	Decode(interface{})
+}
+
+type ReqResponse struct {
 	*http.Response
 	Err      error
-	byteBody []byte
+	ByteBody []byte
 }
 
 // String return the Response Body as a String.
-func (r *Response) String() string {
+func (r *ReqResponse) String() string {
 	return string(r.Bytes())
 }
 
 // Bytes return the Response Body as bytes.
-func (r *Response) Bytes() []byte {
-	return r.byteBody
+func (r *ReqResponse) Bytes() []byte {
+	return r.ByteBody
 }
 
-func (r *Response) Decode(decode interface{}) error {
+func (r *ReqResponse) Decode(decode interface{}) error {
 	ctypeJSON := "application/json"
 	ctypeXML := "application/xml"
 
@@ -34,11 +40,11 @@ func (r *Response) Decode(decode interface{}) error {
 
 		switch {
 		case strings.Contains(ctype, ctypeJSON):
-			return json.Unmarshal(r.byteBody, decode)
+			return json.Unmarshal(r.ByteBody, decode)
 		case strings.Contains(ctype, ctypeXML):
-			return xml.Unmarshal(r.byteBody, decode)
+			return xml.Unmarshal(r.ByteBody, decode)
 		case i == 0:
-			ctype = http.DetectContentType(r.byteBody)
+			ctype = http.DetectContentType(r.ByteBody)
 		}
 
 	}

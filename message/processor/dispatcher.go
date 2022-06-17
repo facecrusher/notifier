@@ -6,11 +6,12 @@ import (
 	"time"
 
 	"github.com/facecrusher/notifier/message/domain"
-	"github.com/facecrusher/notifier/rest"
+
+	"github.com/facecrusher/notifier/rest/client"
 )
 
 const (
-	RETRY_INTERVAL = 2 * rest.DEFAULT_TIMEOUT
+	RETRY_INTERVAL = 2 * client.DEFAULT_TIMEOUT
 )
 
 type Dispatcher interface {
@@ -18,12 +19,12 @@ type Dispatcher interface {
 }
 
 type MessageDispatcher struct {
-	client       rest.NotifierRestClient
+	client       client.NotifierRestClient
 	messageQueue chan NotificationJob
 	interval     time.Duration
 }
 
-func NewDispatcher(mq MessageQueue, c rest.NotifierRestClient, interval *time.Duration) *MessageDispatcher {
+func NewDispatcher(mq MessageQueue, c client.NotifierRestClient, interval *time.Duration) *MessageDispatcher {
 	return &MessageDispatcher{
 		client:       c,
 		messageQueue: mq.GetMessageQueue(),

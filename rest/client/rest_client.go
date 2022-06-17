@@ -1,20 +1,24 @@
-package rest
+package client
 
 import (
 	"net/http"
 	"time"
+
+	"github.com/facecrusher/notifier/rest/builder"
+	"github.com/facecrusher/notifier/rest/http_error"
 )
 
 const (
 	DEFAULT_TIMEOUT = 1000 * time.Millisecond
 )
 
+//go:generate mockgen -source=./rest_client.go -destination=./mock/rest_client.go -package=mock
 type RestClient interface {
 	Post(body interface{}, decode interface{}) error
 }
 
 type NotifierRestClient struct {
-	Request *RequestBuilder
+	Request *builder.RequestBuilder
 	URL     string
 }
 
@@ -22,7 +26,7 @@ func NewNotifierRestClient(url string, headers *map[string]string) *NotifierRest
 	reqHeaders := setHeaders(headers)
 	return &NotifierRestClient{
 		URL: url,
-		Request: &RequestBuilder{
+		Request: &builder.RequestBuilder{
 			Headers: reqHeaders,
 			Timeout: DEFAULT_TIMEOUT,
 		},
@@ -37,7 +41,7 @@ func (nrc *NotifierRestClient) Post(body interface{}, decode interface{}) error 
 
 	if response.StatusCode != http.StatusOK {
 		cause := string(response.Bytes())
-		return NewHTTPError(cause, response.StatusCode, nrc.URL, response.Request.Header)
+		return http_error.NewHTTPError(cause, response.StatusCode, nrc.URL, response.Request.Header)
 	}
 
 	err := response.Decode(&decode)

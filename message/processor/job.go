@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/facecrusher/notifier/message/domain"
-	"github.com/facecrusher/notifier/rest"
+	"github.com/facecrusher/notifier/rest/client"
 )
 
 type Job interface {
@@ -13,12 +13,12 @@ type Job interface {
 }
 
 type NotificationJob struct {
-	Client   rest.NotifierRestClient
+	Client   client.NotifierRestClient
 	Message  domain.Message
 	Interval time.Duration
 }
 
-func NewNotificationJob(client rest.NotifierRestClient, message string, interval time.Duration) *NotificationJob {
+func NewNotificationJob(client client.NotifierRestClient, message string, interval time.Duration) *NotificationJob {
 	return &NotificationJob{
 		Client:   client,
 		Message:  *domain.NewMessage(message),

@@ -4,7 +4,7 @@ import (
 	"sync"
 
 	"github.com/facecrusher/notifier/message/domain"
-	"github.com/facecrusher/notifier/rest"
+	"github.com/facecrusher/notifier/rest/client"
 )
 
 type Sender interface {
@@ -12,14 +12,14 @@ type Sender interface {
 }
 
 type MessageSender struct {
-	RestClient       rest.NotifierRestClient
+	RestClient       client.NotifierRestClient
 	done             sync.WaitGroup
 	readyPool        chan chan NotificationJob
 	assignedJobQueue chan NotificationJob
 	quit             chan bool
 }
 
-func NewMessageSender(restClient rest.NotifierRestClient, readyPool chan chan NotificationJob, done sync.WaitGroup) *MessageSender {
+func NewMessageSender(restClient client.NotifierRestClient, readyPool chan chan NotificationJob, done sync.WaitGroup) *MessageSender {
 	return &MessageSender{
 		RestClient:       restClient,
 		done:             done,

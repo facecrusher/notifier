@@ -1,4 +1,4 @@
-package rest
+package http_error
 
 import (
 	"fmt"
