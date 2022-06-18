@@ -16,9 +16,10 @@ import (
 func Test_Post(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	rb := mock.NewMockReqBuilder(ctrl)
-	customHeaders := map[string]string{"Custom-Header": "custom"}
-	restClient := NewNotifierRestClient("http://www.test.com", &customHeaders)
-	restClient.Request = rb
+	restClient := NotifierRestClient{
+		Request: rb,
+		URL:     "http://www.test.com",
+	}
 	mockHeaders := make(http.Header)
 	mockHeaders.Add("Content-Type", "application/json")
 

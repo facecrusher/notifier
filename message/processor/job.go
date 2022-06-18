@@ -13,12 +13,12 @@ type Job interface {
 }
 
 type NotificationJob struct {
-	Client   client.NotifierRestClient
+	Client   client.RestClient
 	Message  domain.Message
 	Interval time.Duration
 }
 
-func NewNotificationJob(client client.NotifierRestClient, message string, interval time.Duration) *NotificationJob {
+func NewNotificationJob(client client.RestClient, message string, interval time.Duration) *NotificationJob {
 	return &NotificationJob{
 		Client:   client,
 		Message:  *domain.NewMessage(message),

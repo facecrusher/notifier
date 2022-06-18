@@ -20,7 +20,7 @@ func Test_Dispatch(t *testing.T) {
 	testInterval := 1 * time.Second
 
 	// New Dispatcher
-	testDispatcher := NewDispatcher(*testQueue, *testClient, &testInterval)
+	testDispatcher := NewDispatcher(*testQueue, testClient, &testInterval)
 
 	//Success case as messageQueue buffer is empty
 	testMessage := domain.NewMessage("this is first test")

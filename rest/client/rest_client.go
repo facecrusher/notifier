@@ -22,8 +22,8 @@ type NotifierRestClient struct {
 	URL     string
 }
 
-func NewNotifierRestClient(url string, headers *map[string]string) *NotifierRestClient {
-	reqHeaders := setHeaders(headers)
+func NewNotifierRestClient(url string, headers *map[string]string) RestClient {
+	reqHeaders := getCustomHeaders(headers)
 	return &NotifierRestClient{
 		URL:     url,
 		Request: builder.NewRequestBuilder(reqHeaders, DEFAULT_TIMEOUT),
@@ -48,7 +48,7 @@ func (nrc *NotifierRestClient) Post(body interface{}, decode interface{}) error 
 	return nil
 }
 
-func setHeaders(headers *map[string]string) http.Header {
+func getCustomHeaders(headers *map[string]string) http.Header {
 	reqHeaders := make(http.Header)
 	reqHeaders.Add("Content-Type", "application/json")
 	if headers != nil {

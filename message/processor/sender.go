@@ -12,14 +12,14 @@ type Sender interface {
 }
 
 type MessageSender struct {
-	RestClient       client.NotifierRestClient
+	RestClient       client.RestClient
 	done             sync.WaitGroup
 	readyPool        chan chan NotificationJob
 	assignedJobQueue chan NotificationJob
 	quit             chan bool
 }
 
-func NewMessageSender(restClient client.NotifierRestClient, readyPool chan chan NotificationJob, done sync.WaitGroup) *MessageSender {
+func NewMessageSender(restClient client.RestClient, readyPool chan chan NotificationJob, done sync.WaitGroup) *MessageSender {
 	return &MessageSender{
 		RestClient:       restClient,
 		done:             done,

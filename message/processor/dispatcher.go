@@ -19,12 +19,12 @@ type Dispatcher interface {
 }
 
 type MessageDispatcher struct {
-	client       client.NotifierRestClient
+	client       client.RestClient
 	messageQueue chan NotificationJob
 	interval     time.Duration
 }
 
-func NewDispatcher(mq MessageQueue, c client.NotifierRestClient, interval *time.Duration) *MessageDispatcher {
+func NewDispatcher(mq MessageQueue, c client.RestClient, interval *time.Duration) *MessageDispatcher {
 	return &MessageDispatcher{
 		client:       c,
 		messageQueue: mq.GetMessageQueue(),
