@@ -14,6 +14,7 @@ const (
 	RETRY_INTERVAL = 2 * client.DEFAULT_TIMEOUT
 )
 
+//go:generate mockgen -source=./dispatcher.go -destination=./mock/dispatcher.go -package=mock
 type Dispatcher interface {
 	Dispatch(message domain.Message) error
 }
@@ -24,7 +25,7 @@ type MessageDispatcher struct {
 	interval     time.Duration
 }
 
-func NewDispatcher(mq MessageQueue, c client.RestClient, interval *time.Duration) *MessageDispatcher {
+func NewDispatcher(mq MessageQueue, c client.RestClient, interval *time.Duration) Dispatcher {
 	return &MessageDispatcher{
 		client:       c,
 		messageQueue: mq.GetMessageQueue(),
