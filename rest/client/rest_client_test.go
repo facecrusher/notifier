@@ -16,10 +16,11 @@ import (
 func Test_Post(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	rb := mock.NewMockReqBuilder(ctrl)
-	restClient := NewNotifierRestClient("http://www.test.com", nil)
+	customHeaders := map[string]string{"Custom-Header": "custom"}
+	restClient := NewNotifierRestClient("http://www.test.com", &customHeaders)
 	restClient.Request = rb
-	defaultHeaders := make(http.Header)
-	defaultHeaders.Add("Content-Type", "application/json")
+	mockHeaders := make(http.Header)
+	mockHeaders.Add("Content-Type", "application/json")
 
 	type testCase struct {
 		name     string
@@ -36,7 +37,7 @@ func Test_Post(t *testing.T) {
 			response: response.ReqResponse{
 				Response: &http.Response{
 					StatusCode: http.StatusCreated,
-					Header:     defaultHeaders,
+					Header:     mockHeaders,
 				},
 				ByteBody: []byte(`{}`),
 			},
@@ -49,11 +50,11 @@ func Test_Post(t *testing.T) {
 			response: response.ReqResponse{
 				Response: &http.Response{
 					StatusCode: http.StatusBadRequest,
-					Request:    &http.Request{Header: defaultHeaders},
+					Request:    &http.Request{Header: mockHeaders},
 				},
 				ByteBody: []byte(`{}`),
 			},
-			want: http_error.NewHTTPError("{}", http.StatusBadRequest, restClient.URL, defaultHeaders).Error(),
+			want: http_error.NewHTTPError("{}", http.StatusBadRequest, restClient.URL, mockHeaders).Error(),
 		},
 		{
 			name:   "response with unexpected error",
@@ -71,7 +72,7 @@ func Test_Post(t *testing.T) {
 			response: response.ReqResponse{
 				Response: &http.Response{
 					StatusCode: http.StatusCreated,
-					Header:     defaultHeaders,
+					Header:     mockHeaders,
 				},
 				ByteBody: []byte{},
 			},
