@@ -18,18 +18,15 @@ type RestClient interface {
 }
 
 type NotifierRestClient struct {
-	Request *builder.RequestBuilder
+	Request builder.ReqBuilder
 	URL     string
 }
 
 func NewNotifierRestClient(url string, headers *map[string]string) *NotifierRestClient {
 	reqHeaders := setHeaders(headers)
 	return &NotifierRestClient{
-		URL: url,
-		Request: &builder.RequestBuilder{
-			Headers: reqHeaders,
-			Timeout: DEFAULT_TIMEOUT,
-		},
+		URL:     url,
+		Request: builder.NewRequestBuilder(reqHeaders, DEFAULT_TIMEOUT),
 	}
 }
 
@@ -39,7 +36,7 @@ func (nrc *NotifierRestClient) Post(body interface{}, decode interface{}) error 
 		return response.Err
 	}
 
-	if response.StatusCode != http.StatusOK {
+	if response.StatusCode != http.StatusCreated {
 		cause := string(response.Bytes())
 		return http_error.NewHTTPError(cause, response.StatusCode, nrc.URL, response.Request.Header)
 	}

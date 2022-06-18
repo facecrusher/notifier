@@ -1,6 +1,7 @@
 package processor
 
 import (
+	"log"
 	"sync"
 
 	"github.com/facecrusher/notifier/rest/client"
@@ -70,14 +71,21 @@ func (mq *MessageQueue) initDispatch() {
 		case <-mq.quit:
 			mq.processPendingMessages() //process any pending notification jobs in the queue buffer
 			mq.stopSenders()            // stop senders
-			mq.sendersStopped.Wait()    // wait for senders to finish any on going work
-			mq.QueueStopped.Done()      // stop the message queue
+
+			log.Printf("[MessageQueue] Waiting for senders to finish")
+			mq.sendersStopped.Wait() // wait for senders to finish any on going work
+
+			log.Printf("[MessageQueue] Stopping queue")
+			mq.QueueStopped.Done() // stop the message queue
+
+			log.Printf("[MessageQueue] Done")
 			return
 		}
 	}
 }
 
 func (mq *MessageQueue) processPendingMessages() {
+	log.Printf("[MessageQueue] Processing pending buffered messages")
 	for {
 		select {
 		case notificationJob := <-mq.internalQueue:

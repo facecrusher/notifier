@@ -13,13 +13,20 @@ import (
 
 //go:generate mockgen -source=./request_builder.go -destination=./mock/request_builder.go -package=mock
 type ReqBuilder interface {
-	DoPost(url string, body interface{}) (response *response.ReqResponse)
+	DoPost(url string, body interface{}) (responseObj *response.ReqResponse)
 }
 
 type RequestBuilder struct {
 	Headers http.Header
 	Timeout time.Duration
 	Client  *http.Client
+}
+
+func NewRequestBuilder(headers http.Header, timeout time.Duration) ReqBuilder {
+	return &RequestBuilder{
+		Headers: headers,
+		Timeout: timeout,
+	}
 }
 
 // DoPost builds and executes a post request to the given url with the corresponding body as payload
