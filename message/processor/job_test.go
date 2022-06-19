@@ -16,7 +16,7 @@ func Test_Process(t *testing.T) {
 	testMessage := "this is a test"
 	interval := time.Duration(time.Second)
 
-	testJob := NewNotificationJob(client, testMessage, interval)
+	testJob := NewNotificationJob(client, testMessage, interval, nil)
 
 	client.EXPECT().Post(gomock.Any(), gomock.Any()).Return(nil)
 	assert.Nil(t, testJob.Process())
@@ -25,4 +25,5 @@ func Test_Process(t *testing.T) {
 	err := testJob.Process()
 	assert.Error(t, err)
 	assert.Equal(t, "process error", err.Error())
+
 }

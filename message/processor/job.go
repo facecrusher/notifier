@@ -13,16 +13,18 @@ type Job interface {
 }
 
 type NotificationJob struct {
-	Client   client.RestClient
-	Message  domain.Message
-	Interval time.Duration
+	Client    client.RestClient
+	Message   domain.Message
+	Interval  time.Duration
+	processed *chan string //optional chan for testing
 }
 
-func NewNotificationJob(client client.RestClient, message string, interval time.Duration) *NotificationJob {
+func NewNotificationJob(client client.RestClient, message string, interval time.Duration, processedChan *chan string) *NotificationJob {
 	return &NotificationJob{
-		Client:   client,
-		Message:  *domain.NewMessage(message),
-		Interval: interval,
+		Client:    client,
+		Message:   *domain.NewMessage(message),
+		Interval:  interval,
+		processed: processedChan,
 	}
 }
 
@@ -34,5 +36,12 @@ func (j *NotificationJob) Process() error {
 	if err != nil {
 		log.Printf("Error sending notification: [id = %s][message = %s][error = %s]\n", j.Message.ID, j.Message.Message, err.Error())
 	}
+	j.reportProcessed()
 	return err
+}
+
+func (j *NotificationJob) reportProcessed() {
+	if j.processed != nil {
+		*j.processed <- j.Message.Message
+	}
 }

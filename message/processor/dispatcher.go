@@ -34,7 +34,7 @@ func NewDispatcher(mq MessageQueue, c client.RestClient, interval *time.Duration
 }
 
 func (md *MessageDispatcher) Dispatch(message domain.Message) error {
-	messageJob := *NewNotificationJob(md.client, message.Message, md.interval)
+	messageJob := *NewNotificationJob(md.client, message.Message, md.interval, nil)
 	select {
 	case md.messageQueue <- messageJob:
 	default:

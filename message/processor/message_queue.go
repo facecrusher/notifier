@@ -13,7 +13,6 @@ const (
 )
 
 type MessageQueue struct {
-	Options        Options
 	internalQueue  chan NotificationJob
 	availablePool  chan chan NotificationJob
 	senders        []*MessageSender
@@ -27,7 +26,7 @@ type Options struct {
 	MaxQueueSize int
 }
 
-func NewMessageQueue(url string, options *Options, client client.RestClient) *MessageQueue {
+func NewMessageQueue(options *Options, client client.RestClient) *MessageQueue {
 	// Set default queue options if none are provided
 	if options == nil {
 		options = getDefaultOptions()
@@ -35,7 +34,6 @@ func NewMessageQueue(url string, options *Options, client client.RestClient) *Me
 	sendersStopped := sync.WaitGroup{}                                   // set wait group for stopped senders
 	availablePool := make(chan chan NotificationJob, options.MaxSenders) // set pool to maintain available senders
 	return &MessageQueue{
-		Options:        *options,
 		internalQueue:  make(chan NotificationJob, options.MaxQueueSize),
 		availablePool:  availablePool,
 		senders:        createSenders(options.MaxSenders, client, availablePool, sendersStopped),
@@ -54,7 +52,7 @@ func (mq *MessageQueue) Start() {
 	go mq.initDispatch()
 }
 
-// Stop shuts down the message queue, checking that all messages in the buffer are processed and that
+// Stop shuts down the message queue, checking that all messages in the buffer are processed
 // before sending the quit signal.
 func (mq *MessageQueue) Stop() {
 	mq.quit <- true

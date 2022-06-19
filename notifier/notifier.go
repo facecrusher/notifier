@@ -19,7 +19,7 @@ type Notifier struct {
 
 func NewNotifier(url string, interval *time.Duration, options *processor.Options, headers *map[string]string) *Notifier {
 	client := client.NewNotifierRestClient(url, headers)
-	queue := *processor.NewMessageQueue(url, options, client)
+	queue := *processor.NewMessageQueue(options, client)
 	dispatcher := processor.NewDispatcher(queue, client, interval)
 	return &Notifier{
 		url:               url,
