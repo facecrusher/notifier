@@ -22,17 +22,17 @@ func Test_MessageQueue(t *testing.T) {
 	testJob := NewNotificationJob(client, message, interval, &processed)
 
 	testQueue.Start()
+	defer testQueue.Stop()
 
-	// Send a job to the queue, wait for it to finish
-	// and assert that processed message equals to sent message.
-	// Also check that queue is empty (as message has been processed).
 	done := make(chan bool)
+
+	// Test Process Message
 	go func() {
-		testQueue.internalQueue <- *testJob
-		processedMsg := <-processed
+		testQueue.internalQueue <- *testJob //Send test job to the queue
+		processedMsg := <-processed         //Wait for it to be processed
 		done <- true
-		assert.Equal(t, testJob.Message.Message, processedMsg)
+		assert.Equal(t, testJob.Message.Message, processedMsg) //Assert processed msg is same as test job message
 	}()
 	<-done
-	assert.True(t, len(testQueue.internalQueue) == 0)
+	assert.True(t, len(testQueue.internalQueue) == 0) // Assert queue is empty after message is processed
 }
