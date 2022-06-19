@@ -8,8 +8,8 @@ import (
 )
 
 const (
-	DEFAULT_SENDERS    = 5
-	DEFAULT_QUEUE_SIZE = 10
+	DEFAULT_SENDERS    = 100
+	DEFAULT_QUEUE_SIZE = 1000
 )
 
 type MessageQueue struct {

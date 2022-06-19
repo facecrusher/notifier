@@ -40,6 +40,8 @@ func (j *NotificationJob) Process() error {
 	return err
 }
 
+// reportProcessed sends a signal to a channel, reporting that a job has been processed.
+// This function is implemented for testing purposes only.
 func (j *NotificationJob) reportProcessed() {
 	if j.processed != nil {
 		*j.processed <- j.Message.Message
