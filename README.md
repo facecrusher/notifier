@@ -1,7 +1,6 @@
 # Notifier
 
-**Notifier** is a Go library for message delivery, according to the requirements of the refurbed challenge.
-In order to handle requests efficiently, it implements a worker pool pattern, where messages are received and stored in a buffered processing queue, while a group of parallel workers pick jobs and process them accordingly.
+**Notifier** is a basic Go library for message delivery. In order to handle requests efficiently, it implements a worker pool pattern, where messages are received and stored in a buffered processing queue, while a group of parallel workers pick jobs and process them accordingly.
 
 ## Packages
 
@@ -31,6 +30,7 @@ notifier.Stop() // Gracefully stops the worker pool
 ```
 
 ## Testing
+
 The source code includes a makefile to generate test results and coverage reports.
 
 - For test results: `make test`
