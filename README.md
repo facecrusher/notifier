@@ -10,6 +10,13 @@ The library implements the following core packages:
 - **Processor**: It implements the logic for the worker pool pattern for message processing, through the use of channels and go routines. It also allows a few options that can help customize the pool for better performance.
 - **Notifier**: This is just a wrapper that abstracts all the previous logic to make it simple for the consumer to implement.
 
+## Installation
+
+To add the library to a new application, use the following command:
+
+```bash
+go get github.com/facecrusher/notifier
+```
 ## Usage
 
 Use of the library is fair simple, as shown in the example below:
